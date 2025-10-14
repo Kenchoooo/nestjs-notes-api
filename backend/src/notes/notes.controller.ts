@@ -34,4 +34,23 @@ export class NotesController {
   remove(@Param('id') id: string) {
     return this.notesService.remove(id);
   }
+  
+  // Endpoint para archivar una nota.
+  @Patch(':id/archive')
+  archive(@Param('id') id: string) {
+    return this.notesService.archive(id);
+  }
+
+  // Endpoint para desarchivar una nota.
+  @Patch(':id/unarchive')
+  unarchive(@Param('id') id: string) {
+    return this.notesService.unarchive(id);
+  }
+
+  // Endpoint para obtener solo las notas archivadas.
+@Get('archived/all')
+findAllArchived() {
+  return this.notesService.findAllArchived();
+}
+
 }
