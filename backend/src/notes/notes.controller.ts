@@ -17,18 +17,21 @@ export class NotesController {
     return this.notesService.findAll();
   }
 
+  // El id que viene en la URL es un string.
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.notesService.findOne(+id);
+    return this.notesService.findOne(id);
   }
 
+  // El id que viene en la URL es un string.
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateNoteDto: UpdateNoteDto) {
-    return this.notesService.update(+id, updateNoteDto);
+    return this.notesService.update(id, updateNoteDto);
   }
 
+  // El id que viene en la URL es un string.
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.notesService.remove(+id);
+    return this.notesService.remove(id);
   }
 }

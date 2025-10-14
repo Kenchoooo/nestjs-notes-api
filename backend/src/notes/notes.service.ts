@@ -21,12 +21,17 @@ export class NotesService {
     return this.noteRepository.find();
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} note`;
+  // Busca una única nota por su ID.
+  async findOne(id: string): Promise<Note> {
+    const note = await this.noteRepository.findOneBy({ id });
+
+    if (!note) {
+      throw new NotFoundException(`Nota con ID "${id}" no encontrada`);
+    }
+    return note;
   }
 
   async update(id: string, updateNoteDto: UpdateNoteDto): Promise<Note> {
-    // Carga la nota existente y le aplica los nuevos cambios.
     const note = await this.noteRepository.preload({
       id: id,
       ...updateNoteDto,
@@ -35,11 +40,15 @@ export class NotesService {
     if (!note) {
       throw new NotFoundException(`Nota con ID "${id}" no encontrada`);
     }
-
     return this.noteRepository.save(note);
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} note`;
+  // Elimina una nota por su ID.
+  async remove(id: string): Promise<void> {
+    const result = await this.noteRepository.delete(id);
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`Nota con ID "${id}" no encontrada`);
+    }
   }
 }
