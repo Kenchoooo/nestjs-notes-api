@@ -9,12 +9,11 @@ import { AssignTagsDto } from './dto/assign-tags.dto';
 
 @Injectable()
 export class NotesService {
-  // Ahora inyecto los dos repositorios: el de notas y el de tags.
   constructor(
     @InjectRepository(Note)
     private readonly noteRepository: Repository<Note>,
     @InjectRepository(Tag)
-    private readonly tagRepository: Repository<Tag>,
+    private readonly tagRepository: Repository<Tag>, 
   ) {}
 
   create(createNoteDto: CreateNoteDto): Promise<Note> {
@@ -31,7 +30,6 @@ export class NotesService {
   }
 
   async findOne(id: string): Promise<Note> {
-    // Para buscar la nota, le pido que también me traiga los tags relacionados.
     const note = await this.noteRepository.findOne({
       where: { id },
       relations: ['tags'],
@@ -75,26 +73,27 @@ export class NotesService {
     return this.noteRepository.save(note);
   }
 
-  // Asigna una lista de etiquetas a una nota.
   async assignTags(id: string, assignTagsDto: AssignTagsDto): Promise<Note> {
-    const note = await this.findOne(id); // Reúso esto para que me encuentre la nota
+    const note = await this.findOne(id);
     const tags: Tag[] = [];
 
-    // Por cada nombre de tag que me mandaron...
     for (const tagName of assignTagsDto.tags) {
-      // Me fijo si ya existe un tag con ese nombre en la base de datos.
       let tag = await this.tagRepository.findOneBy({ name: tagName });
-
-      // Si no existe, lo creo en memoria.
       if (!tag) {
         tag = this.tagRepository.create({ name: tagName });
       }
       tags.push(tag);
     }
 
-    // Le reemplazo los tags viejos a la nota por los nuevos.
     note.tags = tags;
-    // Guardo la nota. El 'cascade: true' se encarga de guardar los tags nuevos. ¡Magia!
     return this.noteRepository.save(note);
+  }
+
+  findAllByTag(tagName: string): Promise<Note[]> {
+    return this.noteRepository
+      .createQueryBuilder('note') // Empiezo a construir una consulta sobre la tabla 'note'.
+      .innerJoinAndSelect('note.tags', 'tag') // Hago un 'join' con la tabla de tags y pido que me los traiga.
+      .where('tag.name = :tagName', { tagName }) // Busco donde el nombre del tag sea el que me pasaron.
+      .getMany(); // Devuelvo todas las notas que coincidan.
   }
 }

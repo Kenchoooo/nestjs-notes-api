@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { NotesService } from './notes.service';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
@@ -13,8 +13,14 @@ export class NotesController {
     return this.notesService.create(createNoteDto);
   }
 
+  // Ahora esta función puede recibir un filtro por tag.
   @Get()
-  findAll() {
+  findAll(@Query('tag') tagName?: string) {
+    if (tagName) {
+      // Si me pasan un tag, llamo a la nueva función para filtrar.
+      return this.notesService.findAllByTag(tagName);
+    }
+    // Si no me pasan ningún tag, funciona como antes.
     return this.notesService.findAll();
   }
 
