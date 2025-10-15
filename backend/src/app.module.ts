@@ -9,13 +9,14 @@ import { TagsModule } from './tags/tags.module';
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'user', // El mismo que pusimos en docker-compose.yml
-      password: 'password', // La misma que pusimos en docker-compose.yml
-      database: 'notesdb', // El mismo que pusimos en docker-compose.yml
+      // Le digo que lea las variables de entorno. Si no las encuentra, usa el valor de la derecha.
+      host: process.env.POSTGRES_HOST || 'db',
+      port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
+      username: process.env.POSTGRES_USER || 'user',
+      password: process.env.POSTGRES_PASSWORD || 'password',
+      database: process.env.POSTGRES_DB || 'notesdb',
       autoLoadEntities: true,
-      synchronize: true, // ¡Muy importante! Crea las tablas automáticamente
+      synchronize: true,
     }),
     NotesModule,
     TagsModule,

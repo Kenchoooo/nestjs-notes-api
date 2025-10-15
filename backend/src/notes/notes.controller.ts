@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { NotesService } from './notes.service';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
+import { AssignTagsDto } from './dto/assign-tags.dto';
 
 @Controller('notes')
 export class NotesController {
@@ -17,40 +18,38 @@ export class NotesController {
     return this.notesService.findAll();
   }
 
-  // El id que viene en la URL es un string.
+  @Get('archived/all')
+  findAllArchived() {
+    return this.notesService.findAllArchived();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.notesService.findOne(id);
   }
 
-  // El id que viene en la URL es un string.
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateNoteDto: UpdateNoteDto) {
     return this.notesService.update(id, updateNoteDto);
   }
 
-  // El id que viene en la URL es un string.
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.notesService.remove(id);
   }
-  
-  // Endpoint para archivar una nota.
+
   @Patch(':id/archive')
   archive(@Param('id') id: string) {
     return this.notesService.archive(id);
   }
 
-  // Endpoint para desarchivar una nota.
   @Patch(':id/unarchive')
   unarchive(@Param('id') id: string) {
     return this.notesService.unarchive(id);
   }
 
-  // Endpoint para obtener solo las notas archivadas.
-@Get('archived/all')
-findAllArchived() {
-  return this.notesService.findAllArchived();
-}
-
+  @Patch(':id/tags')
+  assignTags(@Param('id') id: string, @Body() assignTagsDto: AssignTagsDto) {
+    return this.notesService.assignTags(id, assignTagsDto);
+  }
 }

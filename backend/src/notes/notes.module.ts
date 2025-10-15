@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { NotesService } from './notes.service';
 import { NotesController } from './notes.controller';
-import { TypeOrmModule } from '@nestjs/typeorm'; // <-- 1. Importa esto
-import { Note } from './entities/note.entity';   // <-- 2. Importa la entidad
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Note } from './entities/note.entity';
+import { Tag } from '../tags/entities/tag.entity'; // Importo el Tag
 
 @Module({
-  // 3. Agrega la siguiente línea al array de 'imports'
-  imports: [TypeOrmModule.forFeature([Note])],
+  // Agrego 'Tag' al array de forFeature para poder usarlo en el servicio de notas.
+  imports: [TypeOrmModule.forFeature([Note, Tag])],
   controllers: [NotesController],
   providers: [NotesService],
 })

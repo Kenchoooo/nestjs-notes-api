@@ -4,12 +4,17 @@ import { UpdateNoteDto } from './dto/update-note.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Note } from './entities/note.entity';
 import { Repository } from 'typeorm';
+import { Tag } from '../tags/entities/tag.entity';
+import { AssignTagsDto } from './dto/assign-tags.dto';
 
 @Injectable()
 export class NotesService {
+  // Ahora inyecto los dos repositorios: el de notas y el de tags.
   constructor(
     @InjectRepository(Note)
     private readonly noteRepository: Repository<Note>,
+    @InjectRepository(Tag)
+    private readonly tagRepository: Repository<Tag>,
   ) {}
 
   create(createNoteDto: CreateNoteDto): Promise<Note> {
@@ -17,19 +22,20 @@ export class NotesService {
     return this.noteRepository.save(newNote);
   }
 
-  // Busca y devuelve todas las notas NO ARCHIVADAS.
-findAll(): Promise<Note[]> {
-  return this.noteRepository.findBy({ is_archived: false });
-}
+  findAll(): Promise<Note[]> {
+    return this.noteRepository.findBy({ is_archived: false });
+  }
 
-// Busca y devuelve todas las notas ARCHIVADAS.
-findAllArchived(): Promise<Note[]> {
-  return this.noteRepository.findBy({ is_archived: true });
-}
+  findAllArchived(): Promise<Note[]> {
+    return this.noteRepository.findBy({ is_archived: true });
+  }
 
-  // Busca una única nota por su ID.
   async findOne(id: string): Promise<Note> {
-    const note = await this.noteRepository.findOneBy({ id });
+    // Para buscar la nota, le pido que también me traiga los tags relacionados.
+    const note = await this.noteRepository.findOne({
+      where: { id },
+      relations: ['tags'],
+    });
 
     if (!note) {
       throw new NotFoundException(`Nota con ID "${id}" no encontrada`);
@@ -49,7 +55,6 @@ findAllArchived(): Promise<Note[]> {
     return this.noteRepository.save(note);
   }
 
-  // Elimina una nota por su ID.
   async remove(id: string): Promise<void> {
     const result = await this.noteRepository.delete(id);
 
@@ -58,17 +63,38 @@ findAllArchived(): Promise<Note[]> {
     }
   }
 
-    // Archiva una nota (pone is_archived en true).
   async archive(id: string): Promise<Note> {
-    const note = await this.findOne(id); // Reutilizamos findOne para buscar y manejar el error si no la encuentra.
+    const note = await this.findOne(id);
     note.is_archived = true;
     return this.noteRepository.save(note);
   }
 
-  // Desarchiva una nota (pone is_archived en false).
   async unarchive(id: string): Promise<Note> {
     const note = await this.findOne(id);
     note.is_archived = false;
+    return this.noteRepository.save(note);
+  }
+
+  // Asigna una lista de etiquetas a una nota.
+  async assignTags(id: string, assignTagsDto: AssignTagsDto): Promise<Note> {
+    const note = await this.findOne(id); // Reúso esto para que me encuentre la nota
+    const tags: Tag[] = [];
+
+    // Por cada nombre de tag que me mandaron...
+    for (const tagName of assignTagsDto.tags) {
+      // Me fijo si ya existe un tag con ese nombre en la base de datos.
+      let tag = await this.tagRepository.findOneBy({ name: tagName });
+
+      // Si no existe, lo creo en memoria.
+      if (!tag) {
+        tag = this.tagRepository.create({ name: tagName });
+      }
+      tags.push(tag);
+    }
+
+    // Le reemplazo los tags viejos a la nota por los nuevos.
+    note.tags = tags;
+    // Guardo la nota. El 'cascade: true' se encarga de guardar los tags nuevos. ¡Magia!
     return this.noteRepository.save(note);
   }
 }
