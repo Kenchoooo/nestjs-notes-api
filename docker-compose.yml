@@ -1,18 +1,29 @@
 version: '3.8'
 
 services:
+  # Mi servicio de base de datos
   db:
-    image: postgres:13
-    container_name: notes-db
-    restart: always
-    environment:
-      POSTGRES_USER: user
+    image: postgres:13 # La imagen que usará
+    container_name: notes-db # Un nombre fácil para el contenedor
+    restart: always # Si se cae, que se levante solo
+    environment: # Variables de entorno para configurar la base de datos
+      POSTGES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: notesdb
-    ports:
+    ports: # Conecto el puerto de mi PC (izquierda) con el del contenedor (derecha)
       - "5432:5432"
-    volumes:
+    volumes: # Aquí guardo los datos para que no se borren si apago el contenedor
       - postgres_data:/var/lib/postgresql/data
 
+  # Mi servicio de backend
+  backend:
+    build: ./backend # Le digo que construya la imagen usando el Dockerfile de la carpeta 'backend'
+    container_name: notes-backend
+    ports:
+      - "3000:3000"
+    depends_on: # ¡Importante! No arranques el backend hasta que la base de datos (db) esté lista.
+      - db
+
+# Aca defino el volumen que usé arriba.
 volumes:
   postgres_data: {}
