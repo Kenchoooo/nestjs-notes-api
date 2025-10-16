@@ -1,55 +1,47 @@
-# Aplicación de Notas - Ejercicio Full Stack Ensolvers
+# API de Notas con NestJS y Docker
 
-Esta es una aplicación web simple que permite a los usuarios crear, editar, eliminar, archivar y listar sus notas personales. El proyecto está estructurado como una Single Page Application (SPA) con un backend de API RESTful.
+### ¿Qué es esto?
 
----
+Es el backend que armé para una app de notas. Una API REST hecha con NestJS que se conecta a una base de datos PostgreSQL.
 
-## Tecnologías Utilizadas
+### ¿Con qué lo hice?
 
-* **Backend:** Node.js (v22.20.0), NestJS (v11.0.1), TypeORM
-* **Base de Datos:** PostgreSQL (v13)
-* **Frontend:** (Pendiente de implementación)
-* **Contenerización:** Docker & Docker Compose
+* **Backend:** NestJS, TypeScript
+* **Base de Datos:** PostgreSQL con TypeORM
+* **Para que todo ande:** Docker y Docker-Compose
 
----
+### ¿Y qué hace?
 
-## Prerrequisitos
+* Crear, leer, editar y borrar notas (CRUD).
+* Archivar y desarchivar notas para sacarlas de la vista principal.
+* Ponerle varios tags (etiquetas) a una nota.
+* Filtrar las notas para ver solo las que tienen un tag específico.
 
-Para ejecutar esta aplicación, solo necesitas tener instalado:
+### Para levantarlo en tu máquina
 
-* [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+Gracias a Docker, es una facil.
 
----
+1.  **Cloná el repo:**
+    `git clone https://github.com/Kenchoooo/nestjs-notes-api.git`
 
-## Cómo Ejecutar la Aplicación
+2.  **Metete en la carpeta:**
+    `cd nestjs-notes-api`
 
-1.  Clona este repositorio en tu máquina.
-2.  Abre una terminal en la carpeta raíz del proyecto.
-3.  Otorga permisos de ejecución al script:
-    ```bash
-    chmod +x run.sh
-    ```
-4.  Ejecuta el script:
-    ```bash
-    ./run.sh
-    ```
-5.  ¡Listo! El backend estará disponible en `http://localhost:3000`. Puedes empezar a probar los endpoints con una herramienta como Postman.
+3.  **Dale permisos al script** (lo hacés una sola vez):
+    `chmod +x run.sh`
 
----
+4.  **Y corrélo:**
+    `./run.sh`
 
-## API Endpoints (Fase 1)
+La API queda andando en `http://localhost:3000`. Podés probarla con Postman o lo que uses.
 
-### Notas
+### Los Endpoints (por si querés chusmear)
 
-* `GET /notes`: Obtiene todas las notas activas.
-* `POST /notes`: Crea una nueva nota.
-    * Body: `{ "title": "string", "content": "string" }`
-* `PATCH /notes/:id`: Actualiza el título o contenido de una nota.
-    * Body: `{ "title"?: "string", "content"?: "string" }`
-* `DELETE /notes/:id`: Elimina una nota.
-
-### Archivo
-
-* `GET /notes/archived/all`: Obtiene todas las notas archivadas.
-* `PATCH /notes/:id/archive`: Archiva una nota.
-* `PATCH /notes/:id/unarchive`: Desarchiva una nota.
+* `GET /notes` -> Te da todas las notas activas.
+* `GET /notes?tag=trabajo` -> Te da solo las notas con el tag "trabajo".
+* `POST /notes` -> Crea una nota. Mandale un JSON en el body con `title` y `content`.
+* `PATCH /notes/:id` -> Edita una nota.
+* `DELETE /notes/:id` -> Borra una nota.
+* `PATCH /notes/:id/archive` -> La archiva.
+* `PATCH /notes/:id/unarchive` -> La desarchiva.
+* `PATCH /notes/:id/tags` -> Le ponés los tags. Mandale un JSON en el body así: `{ "tags": ["trabajo", "idea"] }`.
